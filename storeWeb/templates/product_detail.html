@@ -1,0 +1,162 @@
+<style>
+    body {
+        background-color: #f5f7fa;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+    .product-card {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        background-color: white;
+        width: 100%; /* Full chiều ngang */
+    }
+    .product-header {
+        background: linear-gradient(135deg, #198754, #157347);
+        color: white;
+        padding: 20px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+    }
+    .product-img {
+        max-height: 380px;
+        object-fit: contain;
+        border-radius: 8px;
+        background: #fff;
+    }
+    .product-price {
+        font-size: 1.8rem;
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .btn-action {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 1rem;
+    }
+    /* Đánh giá */
+    .reviews-section {
+        background-color: #f9fafb;
+        padding: 25px;
+        border-radius: 12px;
+        border: 1px solid #e9ecef;
+    }
+    .review-card {
+        background: white;
+        border-radius: 10px;
+        padding: 16px;
+        margin-bottom: 14px;
+        border: 1px solid #e9ecef;
+        transition: all 0.2s ease;
+    }
+    .review-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .review-name {
+        font-weight: bold;
+        color: #198754;
+    }
+    .review-date {
+        font-size: 0.85rem;
+        color: #6c757d;
+    }
+    .star {
+        font-size: 1.2rem;
+    }
+    .review-text {
+        margin-top: 8px;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    .no-review {
+        background: white;
+        padding: 16px;
+        border-radius: 10px;
+        text-align: center;
+        color: #6c757d;
+        border: 1px solid #e9ecef;
+        font-style: italic;
+    }
+</style>
+
+<div class="container-fluid py-5"> <!-- container-fluid để full width -->
+    <div class="product-card">
+        <div class="product-header">🛍 Chi tiết sản phẩm</div>
+        <div class="row g-4 p-4 align-items-center">
+            <!-- Ảnh sản phẩm -->
+            <div class="col-md-5 text-center">
+                <img src="{{ url_for('static', filename=product.diaChiAnh) }}"
+                     alt="{{ product.tenSanPham }}"
+                     class="img-fluid product-img border p-2 shadow-sm">
+            </div>
+
+            <!-- Thông tin sản phẩm -->
+            <div class="col-md-7 text-center text-md-start">
+                <h2 class="fw-bold mb-3">{{ product.tenSanPham }}</h2>
+                <div class="product-price mb-4">{{ "{:,}".format(product.gia|int) }} đ</div>
+
+                <!-- Nút hành động -->
+                <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-md-start mb-4">
+                    <form action="/them_gio_hang" method="post" class="d-flex align-items-center gap-2">
+                        <input type="hidden" name="product_id" value="{{ product.maSanPham }}">
+                        <input type="number" name="quantity" class="form-control" value="1" min="1" style="width: 80px;">
+                        <button type="submit" class="btn btn-success btn-action shadow-sm">
+                            <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                        </button>
+                    </form>
+                    <form action="/mua_ngay" method="post" class="d-flex align-items-center gap-2">
+                        <input type="hidden" name="product_id" value="{{ product.maSanPham }}">
+                        <input type="number" name="quantity" class="form-control" value="1" min="1" style="width: 80px;">
+                        <button type="submit" class="btn btn-danger btn-action shadow-sm">
+                            <i class="bi bi-lightning-charge"></i> Mua ngay
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <hr class="m-0">
+
+        <!-- Đánh giá -->
+        <div class="p-4">
+            <div class="reviews-section text-center">
+                <h4 class="mb-4">💬 Đánh giá sản phẩm</h4>
+
+                {% if reviews %}
+                    {% for rv in reviews %}
+                    <div class="review-card text-start">
+                        <div class="review-header">
+                            <span class="review-name">{{ rv.hoTen }}</span>
+                            <span class="review-date">{{ rv.ngayTao.strftime('%d/%m/%Y') }}</span>
+                        </div>
+                        <div class="mt-1">
+                            {% for i in range(rv.danhGia|int) %}
+                                <i class="bi bi-star-fill text-warning star"></i>
+                            {% endfor %}
+                            {% for i in range(5 - (rv.danhGia|int)) %}
+                                <i class="bi bi-star text-warning star"></i>
+                            {% endfor %}
+                            <span class="ms-1">({{ rv.danhGia }}/5)</span>
+                        </div>
+                        <div class="review-text">
+                            {% if rv.binhLuan %}
+                                {{ rv.binhLuan }}
+                            {% else %}
+                                <span class="text-muted fst-italic">Người dùng không để lại bình luận.</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-review">Chưa có đánh giá nào cho sản phẩm này.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>

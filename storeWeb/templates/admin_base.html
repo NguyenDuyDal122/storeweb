@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Trang quản trị{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background-color: #343a40;
+            color: #fff;
+        }
+        .sidebar a {
+            color: #adb5bd;
+            text-decoration: none;
+            display: block;
+            padding: 12px 15px;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: #495057;
+            color: #fff;
+        }
+        .content { padding: 20px; }
+        .table-wrap { max-height: 500px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+<div class="row g-0">
+    <!-- Sidebar -->
+    <div class="col-md-2 sidebar">
+        <h4 class="p-3 border-bottom">Admin</h4>
+        <a href="/admin" class="active"><i class="bi bi-speedometer2"></i> Trang tổng quan</a>
+        <a href="/admin/monan"><i class="bi bi-basket-fill"></i> Quản lý món ăn vặt</a>
+        <a href="/admin/danhmuc"><i class="bi bi-tags-fill"></i> Quản lý danh mục món ăn</a>
+        <a href="/admin/donhang"><i class="bi bi-receipt"></i> Xem & xử lý đơn hàng</a>
+        <a href="/admin/thongke"><i class="bi bi-bar-chart-fill"></i> Thống kê doanh thu</a>
+        <a href="/admin/nguoidung"><i class="bi bi-people-fill"></i> Quản lý tài khoản</a>
+        <a href="/admin/danhgia"><i class="bi bi-chat-left-text-fill"></i> Quản lý đánh giá</a>
+        <a href="/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
+    </div>
+
+    <!-- Nội dung chính -->
+    <div class="col-md-10 content">
+        {% block content %}
+        <!-- Nội dung riêng từng trang sẽ được chèn vào đây -->
+        {% endblock %}
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Đăng ký tài khoản</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #ffecd2, #fcb69f);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        form {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            color: #333;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #444;
+        }
+
+        input[type=text], input[type=password], input[type=email] {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 18px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        input[type=text]:focus,
+        input[type=password]:focus,
+        input[type=email]:focus {
+            border-color: #4CAF50;
+            box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+            outline: none;
+        }
+
+        input[type=submit] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px;
+            border: none;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        input[type=submit]:hover {
+            background-color: #45a049;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<form method="POST" action="/register">
+    <h2>Đăng ký tài khoản</h2>
+
+    <label for="tenDangNhap">Tên đăng nhập</label>
+    <input type="text" id="tenDangNhap" name="tenDangNhap" required>
+
+    <label for="matKhau">Mật khẩu</label>
+    <input type="password" id="matKhau" name="matKhau" required>
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email">
+
+    <label for="hoTen">Họ tên</label>
+    <input type="text" id="hoTen" name="hoTen">
+
+    <label for="sodienThoai">Số điện thoại</label>
+    <input type="text" id="sodienThoai" name="sodienThoai">
+
+    <label for="diaChi">Địa chỉ</label>
+    <input type="text" id="diaChi" name="diaChi">
+
+    <input type="submit" value="Đăng ký">
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <div class="login-link">
+        Đã có tài khoản? <a href="/login">Đăng nhập</a>
+    </div>
+</form>
+
+</body>
+</html>

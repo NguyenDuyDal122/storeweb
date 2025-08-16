@@ -1,0 +1,49 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">📊 Trang tổng quan</h3>
+
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-bg-primary">
+            <div class="card-body">
+                <h5 class="card-title">Tổng doanh thu</h5>
+                <p class="card-text fs-4">{{ "{:,}".format(doanh_thu|default(0)) }} đ</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-bg-success">
+            <div class="card-body">
+                <h5 class="card-title">Số đơn hàng</h5>
+                <p class="card-text fs-4">{{ tong_don|default(0) }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-bg-warning">
+            <div class="card-body">
+                <h5 class="card-title">Món ăn vặt</h5>
+                <p class="card-text fs-4">{{ tong_mon|default(0) }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-bg-danger">
+            <div class="card-body">
+                <h5 class="card-title">Người dùng</h5>
+                <p class="card-text fs-4">{{ tong_user|default(0) }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h5>Chào mừng {{ session['tenDangNhap'] }} đến với trang quản trị!</h5>
+        <p>Chọn chức năng từ menu bên trái để quản lý hệ thống.</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        .checkout-card {
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+        }
+        .checkout-header {
+            background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+            color: white;
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+        }
+        .product-img {
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .total-price {
+            font-size: 1.4rem;
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .btn-checkout {
+            font-size: 1.1rem;
+            padding: 12px 24px;
+            border-radius: 10px;
+        }
+        .form-check {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+        .form-check:hover {
+            background: #e9f2ff;
+        }
+        .section-title {
+            font-weight: bold;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 6px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-5">
+    <div class="checkout-card bg-white">
+        <div class="checkout-header">💳 Xác nhận thanh toán</div>
+        <div class="p-4">
+
+            <!-- Thông tin người nhận -->
+            <div class="mb-4">
+                <h5 class="section-title">📦 Thông tin người nhận</h5>
+                <p><strong>Họ tên:</strong> {{ user.hoTen }}</p>
+                <p><strong>Email:</strong> {{ user.email }}</p>
+                <p><strong>Số điện thoại:</strong> {{ user.sodienThoai }}</p>
+            </div>
+
+            <form method="post" action="{{ url_for('payment_bp.mua_ngay_thanh_toan') if is_mua_ngay else url_for('payment_bp.xac_nhan_don_hang') }}">
+                <!-- Địa chỉ giao hàng -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">🏠 Địa chỉ giao hàng</label>
+                    <textarea name="diaChiGiaoHang" class="form-control" rows="3" placeholder="Nhập địa chỉ giao hàng"
+                              required></textarea>
+                </div>
+
+                <!-- Danh sách sản phẩm -->
+                <h5 class="section-title">🛍 Sản phẩm đã chọn</h5>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Hình ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Số lượng</th>
+                            <th>Giá</th>
+                            <th>Thành tiền</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in items %}
+                        <tr>
+                            <td>
+                                <img src="{{ url_for('static', filename=item.diaChiAnh) }}" width="60" height="60"
+                                     class="product-img">
+                            </td>
+                            <td>{{ item.tenSanPham }}</td>
+                            <td>{{ item.soLuong }}</td>
+                            <td>{{ "{:,.0f}".format(item.gia) }} đ</td>
+                            <td>{{ "{:,.0f}".format(item.gia * item.soLuong) }} đ</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if is_mua_ngay %}
+                {% for item in items %}
+                <input type="hidden" name="product_id" value="{{ item.maSanPham }}">
+                <input type="hidden" name="quantity" value="{{ item.soLuong }}">
+                {% endfor %}
+                {% endif %}
+
+                <!-- Tổng tiền -->
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Tạm tính:</span>
+                        <span>{{ "{:,.0f}".format(total_price) }} đ</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold">Phí giao hàng:</span>
+                        <span>{{ "{:,.0f}".format(30000) }} đ</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="fw-bold fs-5">Tổng cộng:</span>
+                        <span class="total-price">{{ "{:,.0f}".format(total_price + 30000) }} đ</span>
+                    </div>
+                </div>
+
+                <!-- Phương thức thanh toán -->
+                <div class="mt-4">
+                    <h5 class="section-title">💰 Phương thức thanh toán</h5>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="cod" value="COD"
+                               checked>
+                        <label class="form-check-label fw-semibold" for="cod">
+                            💵 Thanh toán khi nhận hàng (COD)
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="zalopay"
+                               value="ZaloPay">
+                        <label class="form-check-label fw-semibold" for="zalopay">
+                            📱 Thanh toán qua ZaloPay
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Nút thanh toán -->
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg btn-checkout shadow-sm">
+                        🛒 Xác nhận đặt hàng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
