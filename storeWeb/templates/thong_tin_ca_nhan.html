@@ -10,11 +10,13 @@
             <p><strong>Họ tên:</strong> {{ user.hoTen }}</p>
             <p><strong>Tên đăng nhập:</strong> {{ user.tenDangNhap }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
-            <p><strong>Số điện thoại:</strong> {{ user.soDienThoai }}</p>
+            <p><strong>Số điện thoại:</strong> {{ user.sodienThoai }}</p>
             <p><strong>Địa chỉ:</strong> {{ user.diaChi }}</p>
             <p><span class="badge bg-success">Vai trò: {{ user.vaiTro }}</span></p>
             <p><small class="text-muted">Ngày tạo: {{ user.ngayTao }}</small></p>
-            <a href="{{ url_for('doi_mat_khau') }}" class="btn btn-warning mt-3">Đổi mật khẩu</a>
+            <a href="{{ url_for('doi_mat_khau') }}" class="btn btn-warning btn-sm fw-semibold">
+                <i class="bi bi-key-fill me-1"></i> Đổi mật khẩu
+            </a>
         </div>
     </div>
 </div>

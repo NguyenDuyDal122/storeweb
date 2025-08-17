@@ -158,6 +158,9 @@ def doi_mat_khau():
                        (matKhauMoi, session["maNguoiDung"]))
         conn.commit()
 
+        # Thông tin người dùng
+        tenDangNhap = session.get("tenDangNhap")
+
         cursor.close()
         conn.close()
 
@@ -168,10 +171,23 @@ def doi_mat_khau():
 
 @app.context_processor
 def inject_user():
+    tenDangNhap = session.get("tenDangNhap")
+    hoTen = None
+    if tenDangNhap:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT hoTen FROM NguoiDung WHERE tenDangNhap = %s", (tenDangNhap,))
+        user = cursor.fetchone()
+        if user:
+            hoTen = user["hoTen"]
+        cursor.close()
+        conn.close()
+
     return dict(
-        tenDangNhap=session.get("tenDangNhap"),
+        tenDangNhap=tenDangNhap,
         vaiTro=session.get("vaiTro"),
-        maNguoiDung=session.get("maNguoiDung")
+        maNguoiDung=session.get("maNguoiDung"),
+        hoTen=hoTen
     )
 
 if __name__ == "__main__":
