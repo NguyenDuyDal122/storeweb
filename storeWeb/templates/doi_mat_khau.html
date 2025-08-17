@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Đổi mật khẩu{% endblock %}
+
+{% block content %}
+    <h2 class="mb-3">🔒 Đổi mật khẩu</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div>
+        {% for category, msg in messages %}
+        <div class="alert alert-{{ category }}">{{ msg }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    <form method="post">
+        <div class="mb-3">
+            <label class="form-label">Mật khẩu cũ</label>
+            <input type="password" name="matKhauCu" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Mật khẩu mới</label>
+            <input type="password" name="matKhauMoi" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Nhập lại mật khẩu mới</label>
+            <input type="password" name="nhapLai" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Đổi mật khẩu</button>
+        <a href="/thong-tin-ca-nhan" class="btn btn-secondary">Quay lại</a>
+    </form>
+{% endblock %}

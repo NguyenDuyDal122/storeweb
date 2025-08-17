@@ -92,16 +92,30 @@ def cart():
 
 @cart_bp.route("/thanhtoan-giohang", methods=["POST"])
 def checkout():
-    selected_ids = request.form.getlist("selected_items")
+    # Kiểm tra đăng nhập
+    if "tenDangNhap" not in session:
+        flash("Vui lòng đăng nhập để thanh toán!", "warning")
+        return redirect(url_for("auth_bp.login"))
+
+    # Lấy danh sách sản phẩm được chọn
+    selected_ids = request.form.getlist("selected_items[]")
     if not selected_ids:
         flash("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!", "warning")
+        return redirect(url_for("cart_bp.cart"))
+
+    # Ép kiểu int (nếu cần)
+    try:
+        selected_ids = [int(x) for x in selected_ids]
+    except ValueError:
+        flash("Danh sách sản phẩm không hợp lệ!", "danger")
         return redirect(url_for("cart_bp.cart"))
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
+    # Lấy thông tin người dùng
     cursor.execute("""
-        SELECT maNguoiDung, hoTen, email, sodienThoai, diaChi
+        SELECT maNguoiDung, hoTen, email, soDienThoai, diaChi
         FROM NguoiDung
         WHERE tenDangNhap = %s
     """, (session["tenDangNhap"],))
@@ -110,6 +124,7 @@ def checkout():
         flash("Không tìm thấy thông tin người dùng!", "danger")
         return redirect(url_for("cart_bp.cart"))
 
+    # Lấy sản phẩm trong giỏ hàng
     format_strings = ','.join(['%s'] * len(selected_ids))
     cursor.execute(f"""
         SELECT sp.maSanPham, sp.tenSanPham, sp.gia, cth.soLuong, sp.diaChiAnh
@@ -121,6 +136,8 @@ def checkout():
     """, [session["tenDangNhap"]] + selected_ids)
 
     items_to_pay = cursor.fetchall()
+
+    # Tính tổng tiền
     total_price = sum(float(item["gia"]) * int(item["soLuong"]) for item in items_to_pay)
 
     cursor.close()

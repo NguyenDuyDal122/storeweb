@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Thông tin cá nhân{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-3">👤 Thông tin cá nhân</h2>
+    <div class="card">
+        <div class="card-body">
+            <p><strong>Họ tên:</strong> {{ user.hoTen }}</p>
+            <p><strong>Tên đăng nhập:</strong> {{ user.tenDangNhap }}</p>
+            <p><strong>Email:</strong> {{ user.email }}</p>
+            <p><strong>Số điện thoại:</strong> {{ user.soDienThoai }}</p>
+            <p><strong>Địa chỉ:</strong> {{ user.diaChi }}</p>
+            <p><span class="badge bg-success">Vai trò: {{ user.vaiTro }}</span></p>
+            <p><small class="text-muted">Ngày tạo: {{ user.ngayTao }}</small></p>
+            <a href="{{ url_for('doi_mat_khau') }}" class="btn btn-warning mt-3">Đổi mật khẩu</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

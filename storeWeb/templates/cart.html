@@ -1,40 +1,6 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Giỏ hàng</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-        }
-        h2 {
-            font-weight: bold;
-            color: #333;
-        }
-        table {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        .product-img {
-            border-radius: 8px;
-            object-fit: cover;
-        }
-        .btn-success {
-            padding: 10px 25px;
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-        .alert {
-            font-size: 0.95rem;
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
 
+{% block content %}
 <div class="container mt-4">
     <h2 class="mb-4">🛒 Giỏ hàng của bạn</h2>
 
@@ -71,7 +37,7 @@
                     {% for item in cart_items %}
                     <tr>
                         <td class="text-center">
-                            <input type="checkbox" name="selected_items" value="{{ item.maSanPham }}">
+                            <input type="checkbox" name="selected_items[]" value="{{ item.maSanPham }}">
                         </td>
                         <td>
                             <img src="{{ url_for('static', filename=item.diaChiAnh) }}"
@@ -107,31 +73,28 @@
     {% endif %}
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    function toggleSelectAll(source) {
-        const checkboxes = document.querySelectorAll('input[name="selected_items"]');
-        checkboxes.forEach(cb => cb.checked = source.checked);
-    }
+function toggleSelectAll(source) {
+    let checkboxes = document.querySelectorAll('input[name="selected_items[]"]');
+    checkboxes.forEach(cb => cb.checked = source.checked);
+}
 
-    function validateSelection() {
-        const selected = document.querySelectorAll('input[name="selected_items"]:checked');
-        if (selected.length === 0) {
-            alert("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
-            return false;
-        }
-        return true;
+function validateSelection() {
+    let checked = document.querySelectorAll('input[name="selected_items[]"]:checked');
+    if (checked.length === 0) {
+        alert("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
+        return false;
     }
+    return true;
+}
 
-    function deleteItem(btn) {
-        const productId = btn.dataset.productId;
-        fetch('/xoa-gio-hang', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-            body: 'product_id=' + productId
-        }).then(() => location.reload());
-    }
+function deleteItem(btn) {
+    const productId = btn.dataset.productId;
+    fetch('/xoa-gio-hang', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'product_id=' + productId
+    }).then(() => location.reload());
+}
 </script>
-
-</body>
-</html>
+{% endblock %}

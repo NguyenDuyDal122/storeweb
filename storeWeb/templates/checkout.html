@@ -1,60 +1,57 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <title>Thanh toán</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <style>
-        body {
-            background-color: #f5f7fa;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-        }
-        .checkout-card {
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
-        }
-        .checkout-header {
-            background: linear-gradient(135deg, #0d6efd, #0b5ed7);
-            color: white;
-            padding: 20px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
-        }
-        .product-img {
-            border-radius: 8px;
-            object-fit: cover;
-        }
-        .total-price {
-            font-size: 1.4rem;
-            color: #dc3545;
-            font-weight: bold;
-        }
-        .btn-checkout {
-            font-size: 1.1rem;
-            padding: 12px 24px;
-            border-radius: 10px;
-        }
-        .form-check {
-            background: #f8f9fa;
-            border-radius: 8px;
-            padding: 10px 14px;
-            margin-bottom: 8px;
-            transition: all 0.2s;
-        }
-        .form-check:hover {
-            background: #e9f2ff;
-        }
-        .section-title {
-            font-weight: bold;
-            border-bottom: 2px solid #e9ecef;
-            padding-bottom: 6px;
-            margin-bottom: 15px;
-        }
-    </style>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block title %}Thanh toán{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #f5f7fa;
+        font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+    .checkout-card {
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .checkout-header {
+        background: linear-gradient(135deg, #0d6efd, #0b5ed7);
+        color: white;
+        padding: 20px;
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+    }
+    .product-img {
+        border-radius: 8px;
+        object-fit: cover;
+    }
+    .total-price {
+        font-size: 1.4rem;
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .btn-checkout {
+        font-size: 1.1rem;
+        padding: 12px 24px;
+        border-radius: 10px;
+    }
+    .form-check {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        transition: all 0.2s;
+    }
+    .form-check:hover {
+        background: #e9f2ff;
+    }
+    .section-title {
+        font-weight: bold;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 6px;
+        margin-bottom: 15px;
+    }
+</style>
 
 <div class="container py-5">
     <div class="checkout-card bg-white">
@@ -73,8 +70,7 @@
                 <!-- Địa chỉ giao hàng -->
                 <div class="mb-4">
                     <label class="form-label fw-semibold">🏠 Địa chỉ giao hàng</label>
-                    <textarea name="diaChiGiaoHang" class="form-control" rows="3" placeholder="Nhập địa chỉ giao hàng"
-                              required></textarea>
+                    <textarea name="diaChiGiaoHang" class="form-control" rows="3" placeholder="Nhập địa chỉ giao hàng" required></textarea>
                 </div>
 
                 <!-- Danh sách sản phẩm -->
@@ -94,14 +90,14 @@
                         {% for item in items %}
                         <tr>
                             <td>
-                                <img src="{{ url_for('static', filename=item.diaChiAnh) }}" width="60" height="60"
-                                     class="product-img">
+                                <img src="{{ url_for('static', filename=item.diaChiAnh) }}" width="60" height="60" class="product-img">
                             </td>
                             <td>{{ item.tenSanPham }}</td>
                             <td>{{ item.soLuong }}</td>
                             <td>{{ "{:,.0f}".format(item.gia) }} đ</td>
                             <td>{{ "{:,.0f}".format(item.gia * item.soLuong) }} đ</td>
                         </tr>
+                        <input type="hidden" name="selected_items[]" value="{{ item.maSanPham }}">
                         {% endfor %}
                         </tbody>
                     </table>
@@ -135,15 +131,13 @@
                 <div class="mt-4">
                     <h5 class="section-title">💰 Phương thức thanh toán</h5>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="cod" value="COD"
-                               checked>
+                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="cod" value="COD" checked>
                         <label class="form-check-label fw-semibold" for="cod">
                             💵 Thanh toán khi nhận hàng (COD)
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="zalopay"
-                               value="ZaloPay">
+                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="zalopay" value="ZaloPay">
                         <label class="form-check-label fw-semibold" for="zalopay">
                             📱 Thanh toán qua ZaloPay
                         </label>
@@ -160,7 +154,4 @@
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% endblock %}

@@ -10,64 +10,73 @@ def xac_nhan_don_hang():
         return redirect("/login")
 
     dia_chi_giao_hang = request.form.get("diaChiGiaoHang")
-    phuong_thuc_thanh_toan = request.form.get("phuongThucThanhToan")
+    selected_ids = request.form.getlist("selected_items[]")  # ✅ lấy sản phẩm được chọn
 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    # Lấy thông tin người dùng
-    cursor.execute("SELECT * FROM NguoiDung WHERE tenDangNhap = %s", (session["tenDangNhap"],))
-    user = cursor.fetchone()
+    try:
+        # Lấy thông tin người dùng
+        cursor.execute("SELECT * FROM NguoiDung WHERE tenDangNhap = %s", (session["tenDangNhap"],))
+        user = cursor.fetchone()
 
-    # Lấy giỏ hàng
-    cursor.execute("SELECT * FROM GioHang WHERE maNguoiDung = %s", (user["maNguoiDung"],))
-    cart = cursor.fetchone()
+        # Lấy giỏ hàng
+        cursor.execute("SELECT * FROM GioHang WHERE maNguoiDung = %s", (user["maNguoiDung"],))
+        cart = cursor.fetchone()
 
-    if not cart:
-        cursor.close()
-        conn.close()
-        return "Giỏ hàng trống", 400
+        if not cart:
+            return "Giỏ hàng trống", 400
 
-    cursor.execute("""
-        SELECT sp.maSanPham, sp.tenSanPham, sp.gia, cth.soLuong
-        FROM ChiTietGioHang cth
-        JOIN SanPham sp ON cth.maSanPham = sp.maSanPham
-        WHERE cth.maGioHang = %s
-    """, (cart["maGioHang"],))
-    items = cursor.fetchall()
+        # Nếu không chọn sản phẩm nào thì báo lỗi
+        if not selected_ids:
+            return "Vui lòng chọn sản phẩm để thanh toán", 400
 
-    if not items:
-        cursor.close()
-        conn.close()
-        return "Không có sản phẩm để thanh toán", 400
+        # Lấy sản phẩm được chọn
+        format_strings = ','.join(['%s'] * len(selected_ids))
+        cursor.execute(f"""
+            SELECT sp.maSanPham, sp.tenSanPham, sp.gia, cth.soLuong
+            FROM ChiTietGioHang cth
+            JOIN SanPham sp ON cth.maSanPham = sp.maSanPham
+            WHERE cth.maGioHang = %s AND sp.maSanPham IN ({format_strings})
+        """, [cart["maGioHang"]] + selected_ids)
+        items = cursor.fetchall()
 
-    # Tính tổng tiền (có phí ship 30k)
-    tong_gia = sum(float(item["gia"]) * item["soLuong"] for item in items) + 30000
+        if not items:
+            return "Không có sản phẩm hợp lệ để thanh toán", 400
 
-    # Tạo đơn hàng
-    cursor.execute("""
-        INSERT INTO DonHang (maNguoiDung, tongGia, diaChiGiaoHang, trangThai)
-        VALUES (%s, %s, %s, %s)
-    """, (user["maNguoiDung"], tong_gia, dia_chi_giao_hang, "pending"))
-    conn.commit()
-    ma_don_hang = cursor.lastrowid
+        # Tính tổng tiền (có phí ship 30k)
+        tong_gia = sum(float(item["gia"]) * item["soLuong"] for item in items) + 30000
 
-    # Thêm chi tiết đơn hàng
-    for item in items:
+        # Tạo đơn hàng (❌ bỏ phuongThucThanhToan vì bảng không có cột này)
         cursor.execute("""
-            INSERT INTO ChiTietDonHang (maDonHang, maSanPham, soLuong, gia)
+            INSERT INTO DonHang (maNguoiDung, tongGia, diaChiGiaoHang, trangThai)
             VALUES (%s, %s, %s, %s)
-        """, (ma_don_hang, item["maSanPham"], item["soLuong"], item["gia"]))
+        """, (user["maNguoiDung"], tong_gia, dia_chi_giao_hang, "pending"))
+        ma_don_hang = cursor.lastrowid
 
-    # Xóa sản phẩm khỏi giỏ hàng
-    cursor.execute("DELETE FROM ChiTietGioHang WHERE maGioHang = %s", (cart["maGioHang"],))
+        # Thêm chi tiết đơn hàng
+        for item in items:
+            cursor.execute("""
+                INSERT INTO ChiTietDonHang (maDonHang, maSanPham, soLuong, gia)
+                VALUES (%s, %s, %s, %s)
+            """, (ma_don_hang, item["maSanPham"], item["soLuong"], item["gia"]))
 
-    conn.commit()
-    cursor.close()
-    conn.close()
+        # Xóa các sản phẩm đã đặt khỏi giỏ hàng
+        cursor.execute(f"""
+            DELETE FROM ChiTietGioHang 
+            WHERE maGioHang = %s AND maSanPham IN ({format_strings})
+        """, [cart["maGioHang"]] + selected_ids)
 
-    return redirect(url_for("payment_bp.hoa_don", ma_don_hang=ma_don_hang))
+        conn.commit()
+        return redirect(url_for("payment_bp.hoa_don", ma_don_hang=ma_don_hang))
 
+    except Exception as e:
+        conn.rollback()
+        return f"Lỗi khi xác nhận đơn hàng: {str(e)}", 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 @payment_bp.route("/hoa-don/<int:ma_don_hang>")
 def hoa_don(ma_don_hang):

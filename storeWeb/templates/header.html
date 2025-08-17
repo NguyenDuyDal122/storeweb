@@ -1,0 +1,73 @@
+<header>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container-fluid">
+            <!-- Logo -->
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+                🍟 <span class="ms-2">SnackShop</span>
+            </a>
+
+            <!-- Toggle button cho mobile -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                    aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Menu -->
+            <div class="collapse navbar-collapse" id="mainNavbar">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                    {% if tenDangNhap %}
+                    <li class="nav-item">
+                        <a class="nav-link-custom {% if request.path=='/' %}active{% endif %}" href="/">Trang chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom {% if request.path=='/giohang' %}active{% endif %}" href="/giohang">Giỏ
+                            hàng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom {% if request.path=='/thong-tin-ca-nhan' %}active{% endif %}"
+                           href="/thong-tin-ca-nhan">Thông tin cá nhân</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link-custom {% if request.path=='/lich-su-don-hang' %}active{% endif %}"
+                           href="/lich-su-don-hang">Lịch sử mua hàng</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-light text-primary fw-semibold ms-lg-3" href="/logout">Đăng xuất</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-warning fw-semibold ms-lg-3" href="/login">Đăng nhập</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<style>
+    .nav-link-custom {
+      color: white !important;
+      margin-right: 8px;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 6px;
+      transition: 0.3s;
+      text-decoration: none;
+    }
+
+    .navbar-nav {
+      margin-top: 15px; /* Đẩy nguyên hàng nút xuống */
+  }
+
+    .nav-link-custom:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      color: #ffd700 !important; /* vàng khi hover */
+    }
+
+    .nav-link-custom.active {
+      background-color: #ffc107; /* nền vàng khi active */
+      color: #000 !important;
+      font-weight: bold;
+    }
+</style>
