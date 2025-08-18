@@ -1,0 +1,16 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ "Sửa danh mục" if category else "Thêm danh mục" }}{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">{{ "Sửa danh mục" if category else "Thêm danh mục" }}</h2>
+
+<form method="POST">
+    <div class="mb-3">
+        <label class="form-label">Tên danh mục</label>
+        <input type="text" name="tenDanhMuc" class="form-control" 
+               value="{{ category.tenDanhMuc if category else '' }}" required>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ "Cập nhật" if category else "Thêm" }}</button>
+    <a href="{{ url_for('admin.manage_categories') }}" class="btn btn-secondary">Hủy</a>
+</form>
+{% endblock %}

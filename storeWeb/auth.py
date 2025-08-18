@@ -75,28 +75,6 @@ def login():
 
     return render_template("login.html")
 
-admin_bp = Blueprint("admin", __name__)
-
-# Kiểm tra quyền admin trước mỗi request
-@admin_bp.before_request
-def check_admin():
-    if 'vaiTro' not in session or session['vaiTro'] != 'admin':
-        return redirect("/login")
-
-# Dashboard admin
-@admin_bp.route("/admin")
-def dashboard():
-    # Thông tin tạm thời
-    doanh_thu = 1500000
-    tong_don = 15
-    tong_mon = 4
-    tong_user = 2
-    return render_template("admin_dashboard.html",
-                           doanh_thu=doanh_thu,
-                           tong_don=tong_don,
-                           tong_mon=tong_mon,
-                           tong_user=tong_user)
-
 @auth_bp.route("/logout")
 def logout():
     session.clear()

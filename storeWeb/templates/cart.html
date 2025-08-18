@@ -7,12 +7,12 @@
     <!-- Thông báo flash -->
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        {% for category, message in messages %}
-        <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
-            <strong>Thông báo:</strong> {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        {% endfor %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }} alert-dismissible fade show shadow-sm" role="alert">
+        <strong>Thông báo:</strong> {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
     {% endif %}
     {% endwith %}
 
@@ -21,43 +21,44 @@
         <form id="checkoutForm" action="/thanhtoan-giohang" method="post" onsubmit="return validateSelection()">
             <table class="table align-middle mb-0">
                 <thead class="table-primary">
-                    <tr>
-                        <th class="text-center" style="width:50px;">
-                            <input type="checkbox" onclick="toggleSelectAll(this)">
-                        </th>
-                        <th style="width:120px;">Hình ảnh</th>
-                        <th>Tên sản phẩm</th>
-                        <th class="text-end">Giá</th>
-                        <th class="text-center" style="width:100px;">Số lượng</th>
-                        <th class="text-end">Thành tiền</th>
-                        <th class="text-center" style="width:80px;">Thao tác</th>
-                    </tr>
+                <tr>
+                    <th class="text-center" style="width:50px;">
+                        <input type="checkbox" onclick="toggleSelectAll(this)">
+                    </th>
+                    <th style="width:120px;">Hình ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th class="text-end">Giá</th>
+                    <th class="text-center" style="width:100px;">Số lượng</th>
+                    <th class="text-end">Thành tiền</th>
+                    <th class="text-center" style="width:80px;">Thao tác</th>
+                </tr>
                 </thead>
                 <tbody>
-                    {% for item in cart_items %}
-                    <tr>
-                        <td class="text-center">
-                            <input type="checkbox" name="selected_items[]" value="{{ item.maSanPham }}">
-                        </td>
-                        <td>
-                            <img src="{{ url_for('static', filename=item.diaChiAnh) }}"
-                                 alt="{{ item.tenSanPham }}"
-                                 width="80" height="80"
-                                 class="product-img">
-                        </td>
-                        <td>{{ item.tenSanPham }}</td>
-                        <td class="text-end text-danger fw-semibold">{{ "{:,}".format(item.gia|int) }} đ</td>
-                        <td class="text-center">{{ item.soLuong }}</td>
-                        <td class="text-end fw-bold text-success">{{ "{:,}".format(item.gia * item.soLuong|int) }} đ</td>
-                        <td class="text-center">
-                            <!-- Xóa sản phẩm bằng Ajax -->
-                            <button type="button" class="btn btn-sm btn-outline-danger"
-                                    data-product-id="{{ item.maSanPham }}" onclick="deleteItem(this)">
-                                <i class="bi bi-trash"></i> Xóa
-                            </button>
-                        </td>
-                    </tr>
-                    {% endfor %}
+                {% for item in cart_items %}
+                <tr>
+                    <td class="text-center">
+                        <input type="checkbox" name="selected_items[]" value="{{ item.maSanPham }}">
+                    </td>
+                    <td>
+                        <img src="{{ item.diaChiAnh }}"
+                             alt="{{ item.tenSanPham }}"
+                             width="80" height="80"
+                             class="product-img rounded shadow-sm"
+                             style="object-fit: cover;">
+                    </td>
+                    <td>{{ item.tenSanPham }}</td>
+                    <td class="text-end text-danger fw-semibold">{{ "{:,}".format(item.gia|int) }} đ</td>
+                    <td class="text-center">{{ item.soLuong }}</td>
+                    <td class="text-end fw-bold text-success">{{ "{:,}".format(item.gia * item.soLuong|int) }} đ</td>
+                    <td class="text-center">
+                        <!-- Xóa sản phẩm bằng Ajax -->
+                        <button type="button" class="btn btn-sm btn-outline-danger"
+                                data-product-id="{{ item.maSanPham }}" onclick="deleteItem(this)">
+                            <i class="bi bi-trash"></i> Xóa
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
                 </tbody>
             </table>
 
@@ -74,27 +75,27 @@
 </div>
 
 <script>
-function toggleSelectAll(source) {
-    let checkboxes = document.querySelectorAll('input[name="selected_items[]"]');
-    checkboxes.forEach(cb => cb.checked = source.checked);
-}
-
-function validateSelection() {
-    let checked = document.querySelectorAll('input[name="selected_items[]"]:checked');
-    if (checked.length === 0) {
-        alert("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
-        return false;
+    function toggleSelectAll(source) {
+        let checkboxes = document.querySelectorAll('input[name="selected_items[]"]');
+        checkboxes.forEach(cb => cb.checked = source.checked);
     }
-    return true;
-}
 
-function deleteItem(btn) {
-    const productId = btn.dataset.productId;
-    fetch('/xoa-gio-hang', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'product_id=' + productId
-    }).then(() => location.reload());
-}
+    function validateSelection() {
+        let checked = document.querySelectorAll('input[name="selected_items[]"]:checked');
+        if (checked.length === 0) {
+            alert("Vui lòng chọn ít nhất 1 sản phẩm để thanh toán!");
+            return false;
+        }
+        return true;
+    }
+
+    function deleteItem(btn) {
+        const productId = btn.dataset.productId;
+        fetch('/xoa-gio-hang', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'product_id=' + productId
+        }).then(() => location.reload());
+    }
 </script>
 {% endblock %}

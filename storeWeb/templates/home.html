@@ -41,36 +41,54 @@
     </script>
 
     {% if best_sellers %}
-    <div class="mb-5">
-        <h4 class="mb-3 fw-bold text-danger">🔥 Sản phẩm bán chạy</h4>
-        <div class="row">
-            {% for sp in best_sellers %}
-            <div class="col-md-2 col-6 mb-4">
-                <div class="card h-100 shadow-sm border-0 hover-scale">
-                    <img src="{{ url_for('static', filename=sp.diaChiAnh) }}" class="card-img-top rounded-top"
-                         alt="{{ sp.tenSanPham }}">
-                    <div class="card-body text-center p-2">
-                        <h6 class="card-title text-truncate fw-semibold">{{ sp.tenSanPham }}</h6>
+<div class="mb-5">
+    <h4 class="mb-3 fw-bold text-danger">🔥 Sản phẩm bán chạy</h4>
 
-                        <!-- sao -->
-                        <div class="mb-1">
-                            {% set full_stars = sp.trungBinhSao | int %}
-                            {% set half_star = 1 if (sp.trungBinhSao - full_stars) >= 0.5 else 0 %}
-                            {% set empty_stars = 5 - full_stars - half_star %}
-                            {% for i in range(full_stars) %}<i class="bi bi-star-fill text-warning"></i>{% endfor %}
-                            {% if half_star %}<i class="bi bi-star-half text-warning"></i>{% endif %}
-                            {% for i in range(empty_stars) %}<i class="bi bi-star text-warning"></i>{% endfor %}
-                        </div>
+    <div id="bestSellersCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="1500">
+    <div class="carousel-inner">
 
-                        <p class="text-danger fw-bold mb-2">{{ "{:,}".format(sp.gia | int) }} đ</p>
-                        <a href="/product/{{ sp.maSanPham }}" class="btn btn-sm btn-outline-primary w-100">Xem</a>
+        {% for i in range(0, best_sellers|length, 6) %}
+<div class="carousel-item {% if i == 0 %}active{% endif %}">
+    <div class="row justify-content-center">
+        {% for sp in best_sellers[i:i+6] %}
+        <div class="col-md-2 col-6"> <!-- 12 / 6 = 2 cột -->
+            <div class="card shadow-sm border-0 h-100">
+                <img src="{{ sp.diaChiAnh }}" class="card-img-top rounded-top"
+                     alt="{{ sp.tenSanPham }}" style="height:120px;object-fit:cover;">
+                <div class="card-body text-center p-2">
+                    <h6 class="card-title text-truncate fw-semibold">{{ sp.tenSanPham }}</h6>
+
+                    <!-- sao -->
+                    <div class="mb-1">
+                        {% set full_stars = sp.trungBinhSao | int %}
+                        {% set half_star = 1 if (sp.trungBinhSao - full_stars) >= 0.5 else 0 %}
+                        {% set empty_stars = 5 - full_stars - half_star %}
+                        {% for i in range(full_stars) %}<i class="bi bi-star-fill text-warning"></i>{% endfor %}
+                        {% if half_star %}<i class="bi bi-star-half text-warning"></i>{% endif %}
+                        {% for i in range(empty_stars) %}<i class="bi bi-star text-warning"></i>{% endfor %}
                     </div>
+
+                    <p class="text-danger fw-bold mb-2">{{ "{:,}".format(sp.gia | int) }} đ</p>
+                    <a href="/product/{{ sp.maSanPham }}" class="btn btn-sm btn-outline-primary w-100">Xem</a>
                 </div>
             </div>
-            {% endfor %}
         </div>
+        {% endfor %}
     </div>
-    {% endif %}
+</div>
+{% endfor %}
+    </div>
+
+    <!-- Nút điều hướng -->
+    <button class="carousel-control-prev" type="button" data-bs-target="#bestSellersCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+    </button>
+    <button class="carousel-control-next" type="button" data-bs-target="#bestSellersCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+    </button>
+</div>
+</div>
+{% endif %}
 
     {% if sanPhamList %}
     <div class="row">
@@ -78,7 +96,7 @@
         {% for sp in sanPhamList %}
         <div class="col-md-3 col-6 mb-4">
             <div class="card h-100 shadow-sm border-0 hover-scale">
-                <img src="{{ url_for('static', filename=sp.diaChiAnh) }}" class="card-img-top rounded-top"
+                <img src="{{ sp.diaChiAnh }}" class="card-img-top rounded-top"
                      alt="{{ sp.tenSanPham }}">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title fw-semibold">{{ sp.tenSanPham }}</h5>

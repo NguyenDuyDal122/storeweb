@@ -1,0 +1,59 @@
+{% extends "admin_base.html" %}
+{% block title %}Quản lý món ăn{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Quản lý món ăn vặt</h2>
+
+<a href="{{ url_for('admin.add_product') }}" class="btn btn-success mb-3">
+    <i class="bi bi-plus-circle"></i> Thêm món ăn
+</a>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alert alert-info">
+      {% for msg in messages %}
+        <p>{{ msg }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="table-wrap">
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>#</th>
+            <th>Tên món</th>
+            <th>Danh mục</th>
+            <th>Giá</th>
+            <th>Hình ảnh</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in products %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ p.tenSanPham }}</td>
+            <td>{{ p.tenDanhMuc }}</td>
+            <td>{{ p.gia }}</td>
+            <td>
+                {% if p.diaChiAnh %}
+                <img src="{{ p.diaChiAnh }}" alt="{{ p.tenSanPham }}" width="50">
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('admin.edit_product', product_id=p.maSanPham) }}" class="btn btn-sm btn-primary">
+                    <i class="bi bi-pencil-square"></i> Sửa
+                </a>
+                <a href="{{ url_for('admin.delete_product', product_id=p.maSanPham) }}" class="btn btn-sm btn-danger"
+                   onclick="return confirm('Bạn có chắc muốn xóa món ăn này?');">
+                    <i class="bi bi-trash"></i> Xóa
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+{% endblock %}

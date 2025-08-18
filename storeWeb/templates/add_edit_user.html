@@ -1,0 +1,45 @@
+{% extends "admin_base.html" %}
+
+{% block title %}{{ "Sửa tài khoản" if user else "Thêm tài khoản" }}{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">{{ "Sửa tài khoản" if user else "Thêm tài khoản" }}</h2>
+
+<form method="POST">
+    <div class="mb-3">
+        <label class="form-label">Tên đăng nhập</label>
+        <input type="text" name="tenDangNhap" class="form-control" value="{{ user.tenDangNhap if user else '' }}" {% if user %}readonly{% endif %} required>
+    </div>
+    {% if not user %}
+    <div class="mb-3">
+        <label class="form-label">Mật khẩu</label>
+        <input type="password" name="matKhau" class="form-control" required>
+    </div>
+    {% endif %}
+    <div class="mb-3">
+        <label class="form-label">Họ tên</label>
+        <input type="text" name="hoTen" class="form-control" value="{{ user.hoTen if user else '' }}">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" value="{{ user.email if user else '' }}">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Số điện thoại</label>
+        <input type="text" name="sodienThoai" class="form-control" value="{{ user.sodienThoai if user else '' }}">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Địa chỉ</label>
+        <textarea name="diaChi" class="form-control">{{ user.diaChi if user else '' }}</textarea>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Vai trò</label>
+        <select name="vaiTro" class="form-select">
+            <option value="user" {% if user and user.vaiTro=='user' %}selected{% endif %}>User</option>
+            <option value="admin" {% if user and user.vaiTro=='admin' %}selected{% endif %}>Admin</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-primary">{{ "Cập nhật" if user else "Thêm" }}</button>
+    <a href="{{ url_for('admin.manage_users') }}" class="btn btn-secondary">Hủy</a>
+</form>
+{% endblock %}

@@ -1,11 +1,16 @@
-from flask import Flask, render_template, request, session, flash, redirect, url_for
+from flask import Flask, render_template, request, session, flash, redirect, url_for, Blueprint
 from database import get_db_connection
-from auth import auth_bp, admin_bp
+from auth import auth_bp
 from cart import cart_bp
 from payment import payment_bp
 from order_history import order_history_bp
 from review import review_bp
 from product_detail import product_detail_bp
+from profile import profile_bp
+from admin import admin_bp
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
 app = Flask(__name__)
 app.secret_key = '123456'
@@ -18,6 +23,14 @@ app.register_blueprint(payment_bp)
 app.register_blueprint(order_history_bp)
 app.register_blueprint(review_bp)
 app.register_blueprint(product_detail_bp)
+app.register_blueprint(profile_bp)
+
+cloudinary.config(
+    cloud_name='dj0oslp3a',
+    api_key='393547919889753', # API key
+    api_secret='6_mEs6LTpPUCRXuglyGoMy4meg4', # API secret
+    secure=True
+)
 
 @app.route("/")
 def home():
@@ -106,68 +119,6 @@ def home():
         total_pages=total_pages,
         best_sellers=best_sellers  # 🆕 Truyền ra template
     )
-
-@app.route("/thong-tin-ca-nhan")
-def thong_tin_ca_nhan():
-    if "maNguoiDung" not in session:
-        return redirect(url_for("login"))  # Nếu chưa đăng nhập thì chuyển hướng đến login
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    cursor.execute("SELECT * FROM NguoiDung WHERE maNguoiDung = %s", (session["maNguoiDung"],))
-    user = cursor.fetchone()
-
-    cursor.close()
-    conn.close()
-
-    return render_template("thong_tin_ca_nhan.html", user=user)
-
-@app.route("/doi-mat-khau", methods=["GET", "POST"])
-def doi_mat_khau():
-    if "maNguoiDung" not in session:
-        return redirect(url_for("login"))
-
-    if request.method == "POST":
-        matKhauCu = request.form["matKhauCu"]
-        matKhauMoi = request.form["matKhauMoi"]
-        nhapLai = request.form["nhapLai"]
-
-        conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
-
-        # Lấy mật khẩu hiện tại từ DB
-        cursor.execute("SELECT matKhau FROM NguoiDung WHERE maNguoiDung = %s", (session["maNguoiDung"],))
-        user = cursor.fetchone()
-
-        if not user:
-            flash("Người dùng không tồn tại!", "danger")
-            return redirect(url_for("doi_mat_khau"))
-
-        # So sánh mật khẩu cũ (ở đây đang để plain text, khuyên bạn nên hash bằng bcrypt)
-        if matKhauCu != user["matKhau"]:
-            flash("❌ Mật khẩu cũ không chính xác!", "danger")
-            return redirect(url_for("doi_mat_khau"))
-
-        if matKhauMoi != nhapLai:
-            flash("❌ Mật khẩu mới nhập lại không khớp!", "danger")
-            return redirect(url_for("doi_mat_khau"))
-
-        # Cập nhật mật khẩu mới
-        cursor.execute("UPDATE NguoiDung SET matKhau = %s WHERE maNguoiDung = %s",
-                       (matKhauMoi, session["maNguoiDung"]))
-        conn.commit()
-
-        # Thông tin người dùng
-        tenDangNhap = session.get("tenDangNhap")
-
-        cursor.close()
-        conn.close()
-
-        flash("✅ Đổi mật khẩu thành công!", "success")
-        return redirect(url_for("thong_tin_ca_nhan"))
-
-    return render_template("doi_mat_khau.html")
 
 @app.context_processor
 def inject_user():

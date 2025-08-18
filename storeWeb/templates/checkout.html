@@ -66,11 +66,13 @@
                 <p><strong>Số điện thoại:</strong> {{ user.sodienThoai }}</p>
             </div>
 
-            <form method="post" action="{{ url_for('payment_bp.mua_ngay_thanh_toan') if is_mua_ngay else url_for('payment_bp.xac_nhan_don_hang') }}">
+            <form method="post"
+                  action="{{ url_for('payment_bp.mua_ngay_thanh_toan') if is_mua_ngay else url_for('payment_bp.xac_nhan_don_hang') }}">
                 <!-- Địa chỉ giao hàng -->
                 <div class="mb-4">
                     <label class="form-label fw-semibold">🏠 Địa chỉ giao hàng</label>
-                    <textarea name="diaChiGiaoHang" class="form-control" rows="3" placeholder="Nhập địa chỉ giao hàng" required></textarea>
+                    <textarea name="diaChiGiaoHang" class="form-control" rows="3" placeholder="Nhập địa chỉ giao hàng"
+                              required></textarea>
                 </div>
 
                 <!-- Danh sách sản phẩm -->
@@ -90,7 +92,10 @@
                         {% for item in items %}
                         <tr>
                             <td>
-                                <img src="{{ url_for('static', filename=item.diaChiAnh) }}" width="60" height="60" class="product-img">
+                                <img src="{{ item.diaChiAnh }}"
+                                     class="card-img-top rounded-top product-img"
+                                     alt="{{ item.tenSanPham }}"
+                                     width="100" height="100">
                             </td>
                             <td>{{ item.tenSanPham }}</td>
                             <td>{{ item.soLuong }}</td>
@@ -131,13 +136,15 @@
                 <div class="mt-4">
                     <h5 class="section-title">💰 Phương thức thanh toán</h5>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="cod" value="COD" checked>
+                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="cod" value="COD"
+                               checked>
                         <label class="form-check-label fw-semibold" for="cod">
                             💵 Thanh toán khi nhận hàng (COD)
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="zalopay" value="ZaloPay">
+                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="zalopay"
+                               value="ZaloPay">
                         <label class="form-check-label fw-semibold" for="zalopay">
                             📱 Thanh toán qua ZaloPay
                         </label>

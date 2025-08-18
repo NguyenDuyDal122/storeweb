@@ -32,14 +32,16 @@
 <div class="row g-0">
     <!-- Sidebar -->
     <div class="col-md-2 sidebar">
-        <h4 class="p-3 border-bottom">Admin</h4>
+        <h4 class="p-3 border-bottom">
+            {{ hoTen if hoTen else tenDangNhap }}
+        </h4>
         <a href="/admin" class="active"><i class="bi bi-speedometer2"></i> Trang tổng quan</a>
-        <a href="/admin/monan"><i class="bi bi-basket-fill"></i> Quản lý món ăn vặt</a>
+        <a href="/admin/nguoidung"><i class="bi bi-people-fill"></i> Quản lý tài khoản</a>
         <a href="/admin/danhmuc"><i class="bi bi-tags-fill"></i> Quản lý danh mục món ăn</a>
+        <a href="/admin/monan"><i class="bi bi-basket-fill"></i> Quản lý món ăn vặt</a>
+        <a href="/admin/danhgia"><i class="bi bi-chat-left-text-fill"></i> Quản lý đánh giá</a>
         <a href="/admin/donhang"><i class="bi bi-receipt"></i> Xem & xử lý đơn hàng</a>
         <a href="/admin/thongke"><i class="bi bi-bar-chart-fill"></i> Thống kê doanh thu</a>
-        <a href="/admin/nguoidung"><i class="bi bi-people-fill"></i> Quản lý tài khoản</a>
-        <a href="/admin/danhgia"><i class="bi bi-chat-left-text-fill"></i> Quản lý đánh giá</a>
         <a href="/logout"><i class="bi bi-box-arrow-right"></i> Đăng xuất</a>
     </div>
 

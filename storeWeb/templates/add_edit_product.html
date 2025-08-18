@@ -1,0 +1,57 @@
+{% extends "admin_base.html" %}
+{% block title %}{{ "Sửa món ăn" if product else "Thêm món ăn" }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm p-4">
+        <h2 class="mb-4 text-center text-primary">
+            {{ "Sửa món ăn" if product else "Thêm món ăn" }}
+        </h2>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label class="form-label">Tên món ăn</label>
+                <input type="text" name="tenSanPham" class="form-control"
+                       value="{{ product.tenSanPham if product else '' }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Mô tả</label>
+                <textarea name="mieuTa" class="form-control" rows="3">{{ product.mieuTa if product else '' }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Giá</label>
+                <input type="number" name="gia" class="form-control"
+                       value="{{ product.gia if product else '' }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Danh mục</label>
+                <select name="maDanhMuc" class="form-select">
+                    {% for c in categories %}
+                    <option value="{{ c.maDanhMuc }}" {% if product and product.maDanhMuc== c.maDanhMuc %}selected{% endif %}>
+                        {{ c.tenDanhMuc }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Ảnh sản phẩm</label>
+                <input type="file" name="anh" accept="image/*" class="form-control">
+                {% if product and product.diaChiAnh %}
+                <div class="mt-2">
+                    <img src="{{ product.diaChiAnh }}" alt="Ảnh sản phẩm" class="img-thumbnail" width="120">
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-success px-4">💾 Lưu</button>
+                <<a href="{{ url_for('admin.manage_products') }}" class="btn btn-secondary px-4 ms-2">⬅ Quay lại</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

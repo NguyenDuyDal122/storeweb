@@ -13,26 +13,35 @@
 
         <table class="table table-bordered mt-4">
             <thead class="table-light">
-                <tr>
-                    <th>Hình ảnh</th>
-                    <th>Tên sản phẩm</th>
-                    <th>Số lượng</th>
-                    <th>Giá</th>
-                    <th>Thành tiền</th>
-                </tr>
+            <tr>
+                <th>Hình ảnh</th>
+                <th>Tên sản phẩm</th>
+                <th>Số lượng</th>
+                <th>Giá</th>
+                <th>Thành tiền</th>
+            </tr>
             </thead>
             <tbody>
-                {% for item in items %}
-                <tr>
-                    <td><img src="{{ url_for('static', filename=item.diaChiAnh) }}" width="60"></td>
-                    <td>{{ item.tenSanPham }}</td>
-                    <td>{{ item.soLuong }}</td>
-                    <td>{{ "{:,.0f}".format(item.gia) }} đ</td>
-                    <td>{{ "{:,.0f}".format(item.gia * item.soLuong) }} đ</td>
-                </tr>
-                {% endfor %}
+            {% for item in items %}
+            <tr>
+                <td>
+                    <img src="{{ item.diaChiAnh }}"
+                         width="40" height="40"
+                         class="rounded">
+                </td>
+                <td>{{ item.tenSanPham }}</td>
+                <td>{{ item.soLuong }}</td>
+                <td>{{ "{:,.0f}".format(item.gia) }} đ</td>
+                <td>{{ "{:,.0f}".format(item.gia * item.soLuong) }} đ</td>
+            </tr>
+            {% endfor %}
             </tbody>
         </table>
+
+        <div class="d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Phí giao hàng:</span>
+            <span>{{ "{:,.0f}".format(30000) }} đ</span>
+        </div>
 
         <h4 class="text-danger mt-3">Tổng tiền: {{ "{:,.0f}".format(don_hang.tongGia) }} đ</h4>
 
