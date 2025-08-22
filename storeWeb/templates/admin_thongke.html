@@ -1,0 +1,115 @@
+{% extends "admin_base.html" %}
+{% block title %}Thống kê doanh thu{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3 class="mb-4">📊 Thống kê doanh thu</h3>
+
+    <div class="alert alert-success">
+        <b>Tổng doanh thu:</b> {{ "{:,.0f}".format(tong|float) }} đ
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs" id="thongkeTab" role="tablist">
+        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#ngay">Ngày</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#thang">Tháng</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#quy">Quý</a></li>
+        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#nam">Năm</a></li>
+    </ul>
+
+    <div class="tab-content mt-3">
+        <!-- Theo ngày -->
+        <div class="tab-pane fade show active" id="ngay">
+            <canvas id="chartDay" height="100"></canvas>
+            <table class="table table-bordered mt-3">
+                <thead><tr><th>Ngày</th><th>Doanh thu</th></tr></thead>
+                <tbody>
+                {% for row in by_day %}
+                    <tr><td>{{ row.label }}</td><td>{{ "{:,.0f}".format(row.doanhThu|float) }} đ</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Theo tháng -->
+        <div class="tab-pane fade" id="thang">
+            <canvas id="chartMonth" height="100"></canvas>
+            <table class="table table-bordered mt-3">
+                <thead><tr><th>Tháng</th><th>Doanh thu</th></tr></thead>
+                <tbody>
+                {% for row in by_month %}
+                    <tr><td>{{ row.label }}</td><td>{{ "{:,.0f}".format(row.doanhThu|float) }} đ</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Theo quý -->
+        <div class="tab-pane fade" id="quy">
+            <canvas id="chartQuarter" height="100"></canvas>
+            <table class="table table-bordered mt-3">
+                <thead><tr><th>Quý</th><th>Doanh thu</th></tr></thead>
+                <tbody>
+                {% for row in by_quarter %}
+                    <tr><td>{{ row.label }}</td><td>{{ "{:,.0f}".format(row.doanhThu|float) }} đ</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Theo năm -->
+        <div class="tab-pane fade" id="nam">
+            <canvas id="chartYear" height="100"></canvas>
+            <table class="table table-bordered mt-3">
+                <thead><tr><th>Năm</th><th>Doanh thu</th></tr></thead>
+                <tbody>
+                {% for row in by_year %}
+                    <tr><td>{{ row.label }}</td><td>{{ "{:,.0f}".format(row.doanhThu|float) }} đ</td></tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+function renderChart(id, labels, data, labelText) {
+    new Chart(document.getElementById(id), {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: labelText,
+                data: data,
+                fill: true,
+                borderColor: 'blue',
+                tension: 0.3
+            }]
+        }
+    });
+}
+
+// Gọi chart
+renderChart("chartDay",
+    {{ by_day|map(attribute='label')|list|tojson }},
+    {{ by_day|map(attribute='doanhThu')|list|tojson }},
+    "Doanh thu theo ngày");
+
+renderChart("chartMonth",
+    {{ by_month|map(attribute='label')|list|tojson }},
+    {{ by_month|map(attribute='doanhThu')|list|tojson }},
+    "Doanh thu theo tháng");
+
+renderChart("chartQuarter",
+    {{ by_quarter|map(attribute='label')|list|tojson }},
+    {{ by_quarter|map(attribute='doanhThu')|list|tojson }},
+    "Doanh thu theo quý");
+
+renderChart("chartYear",
+    {{ by_year|map(attribute='label')|list|tojson }},
+    {{ by_year|map(attribute='doanhThu')|list|tojson }},
+    "Doanh thu theo năm");
+</script>
+{% endblock %}

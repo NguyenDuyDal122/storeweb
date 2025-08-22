@@ -151,6 +151,14 @@
                         <span class="text-muted fst-italic">Người dùng không để lại bình luận.</span>
                         {% endif %}
                     </div>
+                    <!-- 👇 Phản hồi admin -->
+                    {% if rv.phanHoi %}
+                    <div class="mt-3 p-3 rounded bg-light border">
+                        <strong class="text-success"><i class="bi bi-person-check-fill"></i> Phản hồi của
+                            cửa hàng:</strong>
+                        <div class="mt-1">{{ rv.phanHoi }}</div>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endfor %}
                 {% else %}

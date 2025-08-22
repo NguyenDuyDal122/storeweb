@@ -1,0 +1,54 @@
+{% extends "admin_base.html" %}
+{% block title %}Quản lý đơn hàng{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3 class="mb-4">📦 Danh sách đơn hàng</h3>
+    <div class="table-wrap">
+        <table class="table table-striped align-middle">
+            <thead class="table-dark">
+            <tr>
+                <th>Mã ĐH</th>
+                <th>Khách hàng</th>
+                <th>Tổng giá</th>
+                <th>Thanh toán</th>
+                <th>Trạng thái</th>
+                <th>Ngày tạo</th>
+                <th>Chi tiết</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for dh in orders %}
+            <tr>
+                <td>#{{ dh.maDonHang }}</td>
+                <td>{{ dh.hoTen }}</td>
+                <td>{{ "{:,.0f}".format(dh.tongGia|float) }} đ</td>
+                <td>{{ dh.phuongThucThanhToan }}</td>
+                <td>
+                        <span class="badge bg-{{ 'secondary' if dh.trangThai=='pending' 
+                                                         else 'info' if dh.trangThai=='confirmed'
+                                                         else 'warning' if dh.trangThai=='shipped'
+                                                         else 'danger' }}">
+                            {{ dh.trangThai }}
+                        </span>
+                </td>
+                <td>{{ dh.ngaytao.strftime("%d/%m/%Y %H:%M") }}</td>
+                <td>
+                    <a href="/admin/donhang/{{ dh.maDonHang }}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-eye"></i> Xem
+                    </a>
+                    <form action="/admin/donhang/delete/{{ dh.maDonHang }}" method="POST"
+                          style="display:inline;"
+                          onsubmit="return confirm('Bạn có chắc chắn muốn xóa đơn hàng này không?');">
+                        <button type="submit" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i> Xóa
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

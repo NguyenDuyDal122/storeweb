@@ -1,0 +1,55 @@
+{% extends "admin_base.html" %}
+{% block title %}Chi tiết đơn hàng{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h3 class="mb-4">📄 Chi tiết đơn hàng #{{ order.maDonHang }}</h3>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>👤 Khách hàng: {{ order.hoTen }}</h5>
+            <p><b>Điện thoại:</b> {{ order.sodienThoai }}</p>
+            <p><b>Email:</b> {{ order.email }}</p>
+            <p><b>Địa chỉ:</b> {{ order.diaChi }}</p>
+        </div>
+    </div>
+
+    <div class="table-wrap mb-4">
+        <table class="table table-bordered">
+            <thead class="table-light">
+            <tr>
+                <th>Sản phẩm</th>
+                <th>Ảnh</th>
+                <th>Số lượng</th>
+                <th>Giá</th>
+                <th>Thành tiền</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.tenSanPham }}</td>
+                <td><img src="{{ item.diaChiAnh }}" width="60"></td>
+                <td>{{ item.soLuong }}</td>
+                <td>{{ "{:,.0f}".format(item.gia|float) }} đ</td>
+                <td>{{ "{:,.0f}".format(item.soLuong * item.gia|float) }} đ</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <form action="/admin/donhang/update/{{ order.maDonHang }}" method="POST" class="d-flex gap-2">
+        <select name="trangThai" class="form-select w-auto">
+            <option value="pending" {% if order.trangThai=='pending' %}selected{% endif %}>Chờ xác nhận</option>
+            <option value="confirmed" {% if order.trangThai=='confirmed' %}selected{% endif %}>Đã xác nhận</option>
+            <option value="shipped" {% if order.trangThai=='shipped' %}selected{% endif %}>Đang giao</option>
+            <option value="completed" {% if order.trangThai=='completed' %}selected{% endif %}>Hoàn tất</option>
+            <option value="cancelled" {% if order.trangThai=='cancelled' %}selected{% endif %}>Đã hủy</option>
+        </select>
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-check2-circle"></i> Cập nhật
+        </button>
+    </form>
+</div>
+{% endblock %}

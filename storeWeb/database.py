@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS DonHang (
     tongGia DECIMAL(10,2),
     diaChiGiaoHang TEXT,
     phuongThucThanhToan ENUM('COD','ZaloPay') DEFAULT 'COD',
-    trangThai ENUM('pending','confirmed','shipped','cancelled') DEFAULT 'pending',
+    trangThai ENUM('pending','confirmed','shipped','completed','cancelled') DEFAULT 'pending',
     ngaytao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (maNguoiDung) REFERENCES NguoiDung(maNguoiDung)
         ON DELETE SET NULL
@@ -124,6 +124,7 @@ CREATE TABLE IF NOT EXISTS DanhGia (
     maChiTietDonHang INT,
     danhGia INT CHECK (danhGia BETWEEN 1 AND 5),
     binhLuan TEXT,
+    phanHoi TEXT,
     ngayTao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (maNguoiDung) REFERENCES NguoiDung(maNguoiDung)
         ON DELETE CASCADE

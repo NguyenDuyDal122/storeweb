@@ -29,7 +29,6 @@ def product_detail(maSanPham):
         ORDER BY dg.ngayTao DESC
     """, (maSanPham,))
     reviews = cursor.fetchall()
-
     avg_rating = sum(rv['danhGia'] for rv in reviews) / len(reviews) if reviews else None
 
     cursor.close()

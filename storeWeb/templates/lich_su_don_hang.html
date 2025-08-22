@@ -17,6 +17,7 @@
                     {% if dh.trangThai == 'pending' %}bg-warning text-dark{% endif %}
                     {% if dh.trangThai == 'confirmed' %}bg-primary{% endif %}
                     {% if dh.trangThai == 'shipped' %}bg-success{% endif %}
+                    {% if dh.trangThai == 'completed' %}bg-success{% endif %}
                     {% if dh.trangThai == 'cancelled' %}bg-danger{% endif %}
                     badge-status">
                     {{ dh.trangThai|capitalize }}
@@ -44,6 +45,7 @@
                         <td class="text-end">{{ "{:,}".format(ct.gia|int) }} đ</td>
                         <td class="text-end">{{ "{:,}".format(ct.gia * ct.soLuong|int) }} đ</td>
                         <td class="text-center">
+                            {% if dh.trangThai == 'completed' %}
                             {% if not ct.daDanhGia %}
                             <button class="btn btn-sm btn-outline-primary btn-danh-gia"
                                     type="button"
@@ -57,6 +59,11 @@
                             {% else %}
                             <span class="text-success">✔ Đã đánh giá</span>
                             {% endif %}
+                            {% elif dh.trangThai == 'cancelled' %}
+                            <span class="text-muted">Đơn hàng đã hủy!</span>
+                            {% else %}
+                            <span class="text-muted">Chưa thể đánh giá</span>
+                            {% endif %}
                         </td>
                     </tr>
                     {% endfor %}
@@ -64,6 +71,17 @@
                 </table>
             </div>
         </div>
+        <!-- 📌 Nút hủy đơn hàng chỉ hiện khi trạng thái còn pending -->
+        {% if dh.trangThai == 'pending' %}
+        <div class="text-end p-3">
+            <form action="/huy-don-hang/{{ dh.maDonHang }}" method="POST"
+                  onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng #{{ dh.maDonHang }} không?');">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-x-circle"></i> Hủy đơn hàng
+                </button>
+            </form>
+        </div>
+        {% endif %}
     </div>
     {% endfor %}
     {% else %}

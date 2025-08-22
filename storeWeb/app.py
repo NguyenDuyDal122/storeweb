@@ -8,8 +8,6 @@ from review import review_bp
 from product_detail import product_detail_bp
 from profile import profile_bp
 from admin import admin_bp
-import cloudinary
-import cloudinary.uploader
 import cloudinary.api
 
 app = Flask(__name__)

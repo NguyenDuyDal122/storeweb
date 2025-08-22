@@ -1,0 +1,90 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Quản lý đánh giá{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📋 Quản lý đánh giá</h2>
+
+    <!-- Bảng danh sách đánh giá -->
+    <div class="table-wrap">
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Mã</th>
+                    <th>Người dùng</th>
+                    <th>Sản phẩm</th>
+                    <th>Đánh giá ⭐</th>
+                    <th>Bình luận</th>
+                    <th>Phản hồi admin</th>
+                    <th>Ngày tạo</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dg in danhgias %}
+                <tr>
+                    <td>{{ dg.maDanhGia }}</td>
+                    <td>{{ dg.hoTen if dg.hoTen else dg.tenDangNhap }}</td>
+                    <td>{{ dg.tenSanPham }}</td>
+                    <td>
+                        {% for i in range(1,6) %}
+                            {% if i <= dg.danhGia %} ⭐ {% else %} ☆ {% endif %}
+                        {% endfor %}
+                    </td>
+                    <td>{{ dg.binhLuan }}</td>
+                    <td>
+                        {% if dg.phanHoi %}
+                            <span class="text-success">{{ dg.phanHoi }}</span>
+                        {% else %}
+                            <span class="text-muted">Chưa phản hồi</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ dg.ngayTao }}</td>
+                    <td>
+                        <!-- Xóa -->
+                        <a href="/admin/danhgia/xoa/{{ dg.maDanhGia }}"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Bạn có chắc muốn xóa đánh giá này?')">
+                           <i class="bi bi-trash"></i> Xóa
+                        </a>
+
+                        <!-- Nút phản hồi -->
+                        <button class="btn btn-primary btn-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#replyModal{{ dg.maDanhGia }}">
+                            <i class="bi bi-reply"></i> Phản hồi
+                        </button>
+
+                        <!-- Modal phản hồi -->
+                        <div class="modal fade" id="replyModal{{ dg.maDanhGia }}" tabindex="-1">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <form method="post" action="/admin/danhgia/phanhoi/{{ dg.maDanhGia }}">
+                                <div class="modal-header">
+                                  <h5 class="modal-title">Phản hồi đánh giá #{{ dg.maDanhGia }}</h5>
+                                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                  <textarea name="phanHoi" class="form-control" rows="4" required>{{ dg.phanHoi if dg.phanHoi else '' }}</textarea>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                  <button type="submit" class="btn btn-success">Gửi phản hồi</button>
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted">Chưa có đánh giá nào</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

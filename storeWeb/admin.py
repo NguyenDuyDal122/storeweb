@@ -274,3 +274,210 @@ def delete_product(product_id):
     conn.close()
     flash("Xóa món ăn thành công!")
     return redirect(url_for("admin.manage_products"))
+
+# Trang quản lý đánh giá
+@admin_bp.route("/admin/danhgia")
+def quanly_danhgia():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT dg.maDanhGia, dg.danhGia, dg.binhLuan, dg.phanHoi, dg.ngayTao,
+               nd.hoTen, nd.tenDangNhap,
+               sp.tenSanPham
+        FROM DanhGia dg
+        JOIN NguoiDung nd ON dg.maNguoiDung = nd.maNguoiDung
+        JOIN SanPham sp ON dg.maSanPham = sp.maSanPham
+        ORDER BY dg.ngayTao DESC
+    """)
+    danhgias = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return render_template("manage_review.html", danhgias=danhgias)
+
+
+# Xóa đánh giá (sửa lại route có /admin)
+@admin_bp.route("/admin/danhgia/xoa/<int:id>")
+def xoa_danhgia(id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM DanhGia WHERE maDanhGia = %s", (id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    flash("✅ Đã xóa đánh giá thành công!", "success")
+    return redirect(url_for("admin.quanly_danhgia"))
+
+
+# Phản hồi đánh giá (sửa lại route có /admin)
+@admin_bp.route("/admin/danhgia/phanhoi/<int:id>", methods=["POST"])
+def phanhoi_danhgia(id):
+    phanHoi = request.form.get("phanHoi")
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE DanhGia SET phanHoi=%s WHERE maDanhGia=%s", (phanHoi, id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return redirect(url_for("admin.quanly_danhgia"))
+
+# 📌 Xem danh sách đơn hàng
+@admin_bp.route("/admin/donhang")
+def xem_donhang():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT dh.*, nd.hoTen, nd.sodienThoai, nd.email
+        FROM DonHang dh
+        LEFT JOIN NguoiDung nd ON dh.maNguoiDung = nd.maNguoiDung
+        ORDER BY dh.ngayTao DESC
+    """)
+    orders = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template("admin_donhang.html", orders=orders)
+
+# 📌 Xem chi tiết 1 đơn hàng
+@admin_bp.route("/admin/donhang/<int:maDonHang>")
+def chitiet_donhang(maDonHang):
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT dh.*, nd.hoTen, nd.sodienThoai, nd.email, nd.diaChi
+        FROM DonHang dh
+        LEFT JOIN NguoiDung nd ON dh.maNguoiDung = nd.maNguoiDung
+        WHERE dh.maDonHang = %s
+    """, (maDonHang,))
+    order = cursor.fetchone()
+
+    cursor.execute("""
+        SELECT ctdh.*, sp.tenSanPham, sp.diaChiAnh
+        FROM ChiTietDonHang ctdh
+        JOIN SanPham sp ON ctdh.maSanPham = sp.maSanPham
+        WHERE ctdh.maDonHang = %s
+    """, (maDonHang,))
+    order_items = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template("admin_donhang_chitiet.html", order=order, items=order_items)
+
+# 📌 Cập nhật trạng thái đơn hàng
+@admin_bp.route("/admin/donhang/update/<int:maDonHang>", methods=["POST"])
+def capnhat_donhang(maDonHang):
+    new_status = request.form.get("trangThai")
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        UPDATE DonHang SET trangThai = %s WHERE maDonHang = %s
+    """, (new_status, maDonHang))
+    conn.commit()
+
+    cursor.close()
+    conn.close()
+    flash("✅ Đã cập nhật trạng thái đơn hàng", "success")
+
+    return redirect(url_for("admin.chitiet_donhang", maDonHang=maDonHang))
+
+# 📌 Xóa đơn hàng
+@admin_bp.route("/admin/donhang/delete/<int:maDonHang>", methods=["POST"])
+def xoa_donhang(maDonHang):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Xóa chi tiết đơn hàng trước (do có khóa ngoại)
+        cursor.execute("DELETE FROM ChiTietDonHang WHERE maDonHang = %s", (maDonHang,))
+        # Sau đó xóa đơn hàng
+        cursor.execute("DELETE FROM DonHang WHERE maDonHang = %s", (maDonHang,))
+        conn.commit()
+        flash("🗑️ Đã xóa đơn hàng thành công", "success")
+    except Exception as e:
+        conn.rollback()
+        flash(f"❌ Lỗi khi xóa đơn hàng: {e}", "danger")
+    finally:
+        cursor.close()
+        conn.close()
+
+    return redirect(url_for("admin.xem_donhang"))
+
+# 📊 Xem thống kê doanh thu - FIX ONLY_FULL_GROUP_BY
+@admin_bp.route("/admin/thongke")
+def thongke_doanhthu():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    # --- Thống kê theo ngày ---
+    cursor.execute("""
+        SELECT d AS label, SUM(tongGia) AS doanhThu
+        FROM (
+            SELECT DATE(ngaytao) AS d, tongGia
+            FROM DonHang
+            WHERE trangThai = 'completed'
+        ) t
+        GROUP BY d
+        ORDER BY d DESC
+    """)
+    by_day = cursor.fetchall()
+
+    # --- Thống kê theo tháng ---
+    cursor.execute("""
+        SELECT ym AS label, SUM(tongGia) AS doanhThu
+        FROM (
+            SELECT DATE_FORMAT(ngaytao, '%Y-%m') AS ym, tongGia
+            FROM DonHang
+            WHERE trangThai = 'completed'
+        ) t
+        GROUP BY ym
+        ORDER BY ym DESC
+    """)
+    by_month = cursor.fetchall()
+
+    # --- Thống kê theo quý ---
+    cursor.execute("""
+        SELECT yq AS label, SUM(tongGia) AS doanhThu
+        FROM (
+            SELECT CONCAT(YEAR(ngaytao), '-Q', QUARTER(ngaytao)) AS yq, tongGia
+            FROM DonHang
+            WHERE trangThai = 'completed'
+        ) t
+        GROUP BY yq
+        ORDER BY yq DESC
+    """)
+    by_quarter = cursor.fetchall()
+
+    # --- Thống kê theo năm ---
+    cursor.execute("""
+        SELECT y AS label, SUM(tongGia) AS doanhThu
+        FROM (
+            SELECT YEAR(ngaytao) AS y, tongGia
+            FROM DonHang
+            WHERE trangThai = 'completed'
+        ) t
+        GROUP BY y
+        ORDER BY y DESC
+    """)
+    by_year = cursor.fetchall()
+
+    # Tổng doanh thu tất cả thời gian
+    cursor.execute("""
+        SELECT SUM(tongGia) AS tongDoanhThu
+        FROM DonHang
+        WHERE trangThai = 'completed'
+    """)
+    tong = cursor.fetchone()["tongDoanhThu"] or 0
+
+    cursor.close()
+    conn.close()
+
+    return render_template(
+        "admin_thongke.html",
+        by_day=by_day, by_month=by_month, by_quarter=by_quarter, by_year=by_year,
+        tong=tong
+    )
