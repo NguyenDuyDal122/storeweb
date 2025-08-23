@@ -66,8 +66,8 @@
                 <p><strong>Số điện thoại:</strong> {{ user.sodienThoai }}</p>
             </div>
 
-            <form method="post"
-                  action="{{ url_for('payment_bp.mua_ngay_thanh_toan') if is_mua_ngay else url_for('payment_bp.xac_nhan_don_hang') }}">
+            <form method="post" id="checkoutForm"
+                  action="{{ url_for('payment_bp.process_checkout') }}">
                 <!-- Địa chỉ giao hàng -->
                 <div class="mb-4">
                     <label class="form-label fw-semibold">🏠 Địa chỉ giao hàng</label>
@@ -143,10 +143,10 @@
                         </label>
                     </div>
                     <div class="form-check">
-                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="zalopay"
-                               value="ZaloPay">
-                        <label class="form-check-label fw-semibold" for="zalopay">
-                            📱 Thanh toán qua ZaloPay
+                        <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="paypal"
+                               value="Paypal">
+                        <label class="form-check-label fw-semibold" for="paypal">
+                            📱 Thanh toán qua Paypal
                         </label>
                     </div>
                 </div>

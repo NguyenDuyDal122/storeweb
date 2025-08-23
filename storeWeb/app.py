@@ -76,15 +76,17 @@ def home():
     cursor.execute(query, tuple(params))
     sanPhamList = cursor.fetchall()
 
-    # 🆕 Lấy sản phẩm bán chạy (bán từ 5 sản phẩm trở lên)
+    # 🆕 Lấy sản phẩm bán chạy (chỉ lấy đơn hàng đã hoàn tất)
     cursor.execute("""
         SELECT sp.*, 
                COALESCE(ROUND(AVG(dg.danhGia), 1), 0) AS trungBinhSao,
                COUNT(dg.maDanhGia) AS soDanhGia,
                SUM(ct.soLuong) AS tongBan
         FROM ChiTietDonHang ct
+        JOIN DonHang dh ON ct.maDonHang = dh.maDonHang
         JOIN SanPham sp ON ct.maSanPham = sp.maSanPham
         LEFT JOIN DanhGia dg ON sp.maSanPham = dg.maSanPham
+        WHERE dh.trangThai = 'completed'
         GROUP BY sp.maSanPham
         HAVING tongBan >= 20
         ORDER BY tongBan DESC

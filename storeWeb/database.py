@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS DonHang (
     maNguoiDung INT,
     tongGia DECIMAL(10,2),
     diaChiGiaoHang TEXT,
-    phuongThucThanhToan ENUM('COD','ZaloPay') DEFAULT 'COD',
+    phuongThucThanhToan ENUM('COD','PayPal') DEFAULT 'COD',
     trangThai ENUM('pending','confirmed','shipped','completed','cancelled') DEFAULT 'pending',
     ngaytao DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (maNguoiDung) REFERENCES NguoiDung(maNguoiDung)
