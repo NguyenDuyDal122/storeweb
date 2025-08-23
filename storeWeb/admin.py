@@ -304,7 +304,6 @@ def xoa_danhgia(id):
     conn.commit()
     cursor.close()
     conn.close()
-    flash("✅ Đã xóa đánh giá thành công!", "success")
     return redirect(url_for("admin.quanly_danhgia"))
 
 
@@ -381,7 +380,6 @@ def capnhat_donhang(maDonHang):
 
     cursor.close()
     conn.close()
-    flash("✅ Đã cập nhật trạng thái đơn hàng", "success")
 
     return redirect(url_for("admin.chitiet_donhang", maDonHang=maDonHang))
 
@@ -397,7 +395,6 @@ def xoa_donhang(maDonHang):
         # Sau đó xóa đơn hàng
         cursor.execute("DELETE FROM DonHang WHERE maDonHang = %s", (maDonHang,))
         conn.commit()
-        flash("🗑️ Đã xóa đơn hàng thành công", "success")
     except Exception as e:
         conn.rollback()
         flash(f"❌ Lỗi khi xóa đơn hàng: {e}", "danger")

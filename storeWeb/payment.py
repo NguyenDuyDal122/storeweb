@@ -213,80 +213,94 @@ def paypal_create_order():
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
-    cursor.execute("SELECT * FROM NguoiDung WHERE tenDangNhap = %s", (session["tenDangNhap"],))
-    user = cursor.fetchone()
+    try:
+        # Lấy thông tin người dùng
+        cursor.execute("SELECT * FROM NguoiDung WHERE tenDangNhap = %s", (session["tenDangNhap"],))
+        user = cursor.fetchone()
+        if not user:
+            return "Người dùng không tồn tại", 404
 
-    items = []
-    tong_gia = 0
+        items = []
+        tong_gia = 0
 
-    if request.form.get("product_id"):   # MUA NGAY
+        # MUA NGAY
         product_id = request.form.get("product_id")
-        quantity = int(request.form.get("quantity", 1))
+        if product_id:
+            quantity = int(request.form.get("quantity", 1))
+            cursor.execute("SELECT * FROM SanPham WHERE maSanPham = %s", (product_id,))
+            product = cursor.fetchone()
+            if not product:
+                return "Sản phẩm không tồn tại", 404
 
-        cursor.execute("SELECT * FROM SanPham WHERE maSanPham = %s", (product_id,))
-        product = cursor.fetchone()
-        if not product:
-            return "Sản phẩm không tồn tại", 404
+            gia_float = float(product["gia"])
+            items = [{
+                "maSanPham": product["maSanPham"],
+                "tenSanPham": product["tenSanPham"],
+                "gia": gia_float,
+                "soLuong": quantity,
+                "diaChiAnh": product["diaChiAnh"]
+            }]
+            tong_gia = gia_float * quantity + 30000
 
-        items = [{
-            "maSanPham": product["maSanPham"],
-            "tenSanPham": product["tenSanPham"],
-            "gia": float(product["gia"]),
-            "soLuong": quantity,
-            "diaChiAnh": product["diaChiAnh"]  # 🟢 thêm dòng này
-        }]
-        tong_gia = float(product["gia"]) * quantity + 30000
+        # GIỎ HÀNG
+        else:
+            selected_ids = request.form.getlist("selected_items[]")
+            if not selected_ids:
+                return "Không có sản phẩm hợp lệ", 400
 
-    else:  # GIỎ HÀNG
-        selected_ids = request.form.getlist("selected_items[]")
-        if not selected_ids:
-            return "Không có sản phẩm hợp lệ", 400
+            format_strings = ','.join(['%s'] * len(selected_ids))
+            cursor.execute(f"""
+                SELECT sp.maSanPham, sp.tenSanPham, sp.gia, sp.diaChiAnh, cth.soLuong
+                FROM ChiTietGioHang cth
+                JOIN GioHang gh ON cth.maGioHang = gh.maGioHang
+                JOIN SanPham sp ON cth.maSanPham = sp.maSanPham
+                WHERE gh.maNguoiDung = %s AND sp.maSanPham IN ({format_strings})
+            """, [user["maNguoiDung"]] + selected_ids)
+            items = cursor.fetchall()
 
-        format_strings = ','.join(['%s'] * len(selected_ids))
-        cursor.execute(f"""
-            SELECT sp.maSanPham, sp.tenSanPham, sp.gia, cth.soLuong
-            FROM ChiTietGioHang cth
-            JOIN GioHang gh ON cth.maGioHang = gh.maGioHang
-            JOIN SanPham sp ON cth.maSanPham = sp.maSanPham
-            WHERE gh.maNguoiDung = %s AND sp.maSanPham IN ({format_strings})
-        """, [user["maNguoiDung"]] + selected_ids)
-        items = cursor.fetchall()
+            if not items:
+                return "Không có sản phẩm hợp lệ", 400
 
-        if not items:
-            return "Không có sản phẩm hợp lệ", 400
+            # Ép kiểu float cho giá từng sản phẩm
+            for item in items:
+                item["gia"] = float(item["gia"])
+            tong_gia = sum(item["gia"] * item["soLuong"] for item in items) + 30000
 
-        tong_gia = sum(float(item["gia"]) * item["soLuong"] for item in items) + 30000
-
-    cursor.close()
-    conn.close()
-
-    # 🟢 Lưu vào session để paypal_capture_order lấy lại
-    session["paypal_checkout"] = {
-        "items": items,
-        "tong_gia": tong_gia,
-        "diaChiGiaoHang": dia_chi_giao_hang
-    }
-
-    # Tạo order Paypal
-    access_token = get_paypal_access_token()
-    order_data = {
-        "intent": "CAPTURE",
-        "purchase_units": [{
-            "amount": {"currency_code": "USD", "value": f"{tong_gia/24000:.2f}"}
-        }],
-        "application_context": {
-            "return_url": url_for("payment_bp.paypal_capture_order", _external=True),
-            "cancel_url": url_for("payment_bp.xac_nhan_don_hang", _external=True)
+        # Lưu dữ liệu vào session để lấy khi capture Paypal
+        session["paypal_checkout"] = {
+            "items": items,
+            "tong_gia": tong_gia,
+            "diaChiGiaoHang": dia_chi_giao_hang
         }
-    }
 
-    headers = {"Content-Type": "application/json", "Authorization": f"Bearer {access_token}"}
-    r = requests.post(f"{PAYPAL_API_BASE}/v2/checkout/orders", json=order_data, headers=headers)
-    r.raise_for_status()
-    order = r.json()
+        # Tạo order Paypal
+        access_token = get_paypal_access_token()
+        tong_gia = float(tong_gia)  # ✅ ép kiểu chắc chắn
+        order_data = {
+            "intent": "CAPTURE",
+            "purchase_units": [{
+                "amount": {"currency_code": "USD", "value": f"{tong_gia/24000:.2f}"}
+            }],
+            "application_context": {
+                "return_url": url_for("payment_bp.paypal_capture_order", _external=True),
+                "cancel_url": url_for("payment_bp.xac_nhan_don_hang", _external=True)
+            }
+        }
 
-    approve_url = next(link["href"] for link in order["links"] if link["rel"] == "approve")
-    return redirect(approve_url)
+        headers = {"Content-Type": "application/json", "Authorization": f"Bearer {access_token}"}
+        r = requests.post(f"{PAYPAL_API_BASE}/v2/checkout/orders", json=order_data, headers=headers)
+        r.raise_for_status()
+        order = r.json()
+
+        approve_url = next(link["href"] for link in order["links"] if link["rel"] == "approve")
+        return redirect(approve_url)
+
+    except Exception as e:
+        return f"Lỗi khi tạo đơn Paypal: {str(e)}", 500
+
+    finally:
+        cursor.close()
+        conn.close()
 
 
 @payment_bp.route("/paypal_capture_order")
@@ -302,7 +316,7 @@ def paypal_capture_order():
     if data["status"] != "COMPLETED":
         return "Thanh toán Paypal thất bại", 400
 
-    # 🟢 Lấy thông tin đã lưu ở session
+    # Lấy thông tin đã lưu ở session
     checkout_data = session.pop("paypal_checkout", None)
     if not checkout_data:
         return "Không tìm thấy dữ liệu thanh toán", 400
@@ -317,12 +331,14 @@ def paypal_capture_order():
     try:
         cursor.execute("SELECT * FROM NguoiDung WHERE tenDangNhap=%s", (session["tenDangNhap"],))
         user = cursor.fetchone()
+        if not user:
+            return "Người dùng không tồn tại", 404
 
         # Tạo đơn hàng
         cursor.execute("""
-            INSERT INTO DonHang (maNguoiDung, tongGia, diaChiGiaoHang, trangThai)
-            VALUES (%s, %s, %s, %s)
-        """, (user["maNguoiDung"], tong_gia, diaChiGiaoHang, "completed"))
+            INSERT INTO DonHang (maNguoiDung, tongGia, diaChiGiaoHang, phuongThucThanhToan, trangThai)
+            VALUES (%s, %s, %s, %s, %s)
+        """, (user["maNguoiDung"], tong_gia, diaChiGiaoHang, "PayPal", "pending"))
         maDonHang = cursor.lastrowid
 
         # Lưu chi tiết sản phẩm
@@ -332,11 +348,21 @@ def paypal_capture_order():
                 VALUES (%s, %s, %s, %s)
             """, (maDonHang, item["maSanPham"], item["soLuong"], item["gia"]))
 
+        # Xóa sản phẩm đã thanh toán khỏi giỏ hàng (nếu có)
+        cursor.execute("SELECT * FROM GioHang WHERE maNguoiDung=%s", (user["maNguoiDung"],))
+        cart = cursor.fetchone()
+        if cart:
+            format_strings = ','.join(['%s'] * len(items))
+            cursor.execute(f"""
+                DELETE FROM ChiTietGioHang
+                WHERE maGioHang=%s AND maSanPham IN ({format_strings})
+            """, [cart["maGioHang"]] + [item["maSanPham"] for item in items])
+
         conn.commit()
 
         # Lấy lại thông tin đơn hàng để hiển thị hóa đơn
         cursor.execute("""
-            SELECT dh.*, nd.hoTen, nd.soDienThoai
+            SELECT dh.*, nd.hoTen, nd.sodienThoai
             FROM DonHang dh
             JOIN NguoiDung nd ON dh.maNguoiDung = nd.maNguoiDung
             WHERE dh.maDonHang = %s
